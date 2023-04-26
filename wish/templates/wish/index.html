@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+HELLO, {{ request.user.username }}
+
+<a href="{% url 'users:login' %}">
+    login
+</a>
+<a href="{% url 'users:registration' %}">register
+</a>
+
+
+<h>
+    <a href="{% url 'admin:index' %}">admin</a>
+</h>
+
+<div>
+    <a href="{% url 'wish:wishes' %}"> wish </a>
+</div>
+
+{% if user.is_authenticated %}
+    <a href="{% url 'users:logout' %}">
+        logout
+    </a>
+{% endif %}
+
+
+{% for user in users %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text">{{ user.username }}</p>
+        </div>
+    </div>
+{% endfor %}
+
+
+</body>
+</html>

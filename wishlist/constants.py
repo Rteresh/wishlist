@@ -1,0 +1,1 @@
+ATTEMPTS_IN_WEEK = 5
