@@ -21,6 +21,12 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    def delete(self, *args, **kwargs):
+        # обновляем поле is_matched у всех пользователей,
+        # у которых matched_user равен удаляемому пользователю
+        User.objects.filter(matched_user=self).update(is_matched=False)
+        super().delete(*args, **kwargs)
+
 
 class EmailVerification(models.Model):
     code = models.UUIDField(unique=True)

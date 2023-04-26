@@ -6,7 +6,7 @@ from django.views.generic.edit import CreateView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
-from users.models import User, EmailVerification, RequestMatchVerification
+from users.models import User, EmailVerification, RequestMatchVerification, UserMatchCreate
 from users.forms import UserRegistrationForm, UserAuthForm
 
 
@@ -46,6 +46,12 @@ class EmailVerificationView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse('index'))
 
 
+def user_change(main_user, matched_user):
+    main_user.is_matched = True
+    main_user.matched_user = matched_user
+    main_user.save()
+
+
 class UserMatchVerificationView(TemplateView):
     template_name = 'wish/test.html'
 
@@ -60,8 +66,11 @@ class UserMatchVerificationView(TemplateView):
             return HttpResponseBadRequest('Invalid code')
 
         if match_request_verification is not None and not match_request_verification.is_expired():
-            user1 = match_request_verification.requested_user
-            user2 = match_request_verification.main_user
-            print('Welcome!')
+            user1 = match_request_verification.main_user
+            user2 = match_request_verification.requested_user
 
+            UserMatchCreate.objects.create(user_main=user1, user_requested=user2)
+
+            user_change(main_user=user1, matched_user=user2)
+            user_change(main_user=user2, matched_user=user1)
         return super().get(request, *args, **kwargs)
