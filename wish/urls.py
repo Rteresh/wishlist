@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.urls import path
 
-from wish.views import IndexView, MatchFormView
+from wish.views import IndexView, MatchFormView, MakeWishList
 
 app_name = 'wish'
 
 urlpatterns = [
     # Users
     path('', MatchFormView.as_view(), name='wishes'),
+    path('makewish', MakeWishList.as_view(), name='wish_list'),
 ]

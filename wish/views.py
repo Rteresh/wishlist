@@ -9,6 +9,8 @@ from django.contrib import messages
 from users.models import User
 from users.forms import MatchForm
 
+from wish.forms import WishForm
+
 
 # Create your views here.
 
@@ -23,7 +25,7 @@ class IndexView(TemplateView):
 
 
 class MatchFormView(SuccessMessageMixin, FormView):
-    template_name = 'wish/test_index.html'
+    template_name = 'wish/succes_match.html'
     form_class = MatchForm
     success_url = reverse_lazy('wish:wishes')
 
@@ -35,3 +37,19 @@ class MatchFormView(SuccessMessageMixin, FormView):
         else:
             messages.warning(self.request, message)
         return super().form_valid(form)
+
+
+class MakeWishList(FormView):
+    template_name = 'wish/make_wish_list.html'
+    form_class = WishForm
+    success_url = reverse_lazy('wish:wish_list')
+
+    def form_valid(self, form):
+        # Сохранение желания
+        wish = form.save(commit=False)
+        wish.user = self.request.user
+        wish.save()
+
+        return super().form_valid(form)
+
+

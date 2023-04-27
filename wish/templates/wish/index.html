@@ -26,6 +26,9 @@ HELLO, {{ request.user.username }}
     <a href="{% url 'users:logout' %}">
         logout
     </a>
+    <a href="{% url 'wish:wish_list' %}">
+        Желания
+    </a>
 {% endif %}
 
 
