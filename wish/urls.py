@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 
-from wish.views import IndexView, MatchFormView, MakeWishList
+from wish.views import IndexView, MatchFormView, MakeWishList, create_active_wish
 
 app_name = 'wish'
 
@@ -23,4 +23,5 @@ urlpatterns = [
     # Users
     path('', MatchFormView.as_view(), name='wishes'),
     path('makewish', MakeWishList.as_view(), name='wish_list'),
+    path('active_wish', create_active_wish, name='active_wish')
 ]

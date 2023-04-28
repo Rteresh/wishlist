@@ -21,6 +21,10 @@ HELLO, {{ request.user.username }}
 <div>
     <a href="{% url 'wish:wishes' %}"> wish </a>
 </div>
+<div>
+    <a href="{% url 'wish:active_wish' %}"> active_wish </a>
+</div>
+
 
 {% if user.is_authenticated %}
     <a href="{% url 'users:logout' %}">

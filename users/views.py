@@ -6,7 +6,7 @@ from django.views.generic.edit import CreateView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
-from users.models import User, EmailVerification, RequestMatchVerification, UserMatchCreate
+from users.models import User, EmailVerification, RequestMatchVerification, UsersMatches
 from users.forms import UserRegistrationForm, UserAuthForm
 
 
@@ -69,7 +69,7 @@ class UserMatchVerificationView(TemplateView):
             user1 = match_request_verification.main_user
             user2 = match_request_verification.requested_user
 
-            UserMatchCreate.objects.create(user_main=user1, user_requested=user2)
+            UsersMatches.objects.create(user_main=user1, user_requested=user2)
 
             user_change(main_user=user1, matched_user=user2)
             user_change(main_user=user2, matched_user=user1)

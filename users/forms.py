@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserChangeForm, UserCr
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 
-from users.models import User, EmailVerification, UserMatchCreate, RequestMatchVerification
+from users.models import User, EmailVerification, UsersMatches, RequestMatchVerification
 
 
 class UserAuthForm(AuthenticationForm):

@@ -1,3 +1,5 @@
+import random
+
 from django.core.mail import send_mail
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
@@ -60,7 +62,7 @@ class EmailVerification(models.Model):
         return self.expiration <= now()
 
 
-class UserMatchCreate(models.Model):
+class UsersMatches(models.Model):
     user_main = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user1')
     user_requested = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user2')
     created_at = models.DateTimeField(auto_now_add=True)

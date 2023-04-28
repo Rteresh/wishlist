@@ -19,7 +19,7 @@ class Wish(models.Model):
 
 
 class ActiveWish(models.Model):
-    name_wish = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='execute_wish')
+    name_wish = models.ForeignKey(to=Wish, on_delete=models.CASCADE, related_name='name_wish')
     user_to_execute_wish = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='user_to_execute_wish')
     user_whose_wish_to_execute = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name='user_whose_wish_to_execute')

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from wish.models import Wish
+from wish.models import Wish, ActiveWish
 
 
 # Register your models here.
@@ -16,3 +16,6 @@ class WishAdmin(admin.TabularInline):
     fields = ('id', 'tittle', 'description')
     readonly_fields = ('id', 'tittle', 'description')
     extra = 0
+
+
+admin.site.register(ActiveWish)

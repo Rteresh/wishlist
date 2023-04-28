@@ -1,15 +1,22 @@
+import random
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, reverse
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import TemplateView, FormView
 from django.contrib import messages
+from django.db.models import Q
+from django.utils.timezone import now
 
-from users.models import User
+from users.models import User, UsersMatches
 from users.forms import MatchForm
 
 from wish.forms import WishForm
+from wish.models import Wish, ActiveWish
 
 
 # Create your views here.
@@ -53,3 +60,60 @@ class MakeWishList(FormView):
         return super().form_valid(form)
 
 
+@login_required
+def create_active_wish(request):
+    user = request.user
+    matches = UsersMatches.objects.filter(
+        (Q(user_main=user) | Q(user_requested=user))
+    )
+    random_wish = get_random_wish(user)
+    days_to_finished = random.randint(5, 10)
+    target_date = now() + timedelta(days=days_to_finished)
+    active_wish = ActiveWish.objects.create(name_wish=random_wish,
+                                            user_to_execute_wish=user,
+                                            user_whose_wish_to_execute=matches.first().user_requested,
+                                            expiration=target_date)
+
+    context = {'active_wish': active_wish}
+    return render(request, 'wish/test_active_wish.html', context)
+
+
+def get_random_wish(user):
+    matches = UsersMatches.objects.filter(
+        (Q(user_main=user) | Q(user_requested=user))
+    )  # Если у пользователя нет ни одного совпадения, возвращаем None
+    wishes = Wish.objects.filter(user=matches.first().user_requested)
+    if not wishes:
+        return HttpResponseRedirect('У вас нет желаний в вашем списке')
+    random_wish = wishes.order_by('?').first()
+    return random_wish
+
+#
+# from users.models import User, UsersMatches
+# from wish.models import Wish, ActiveWish
+#
+# user = User.objects.get(id=1)
+# matches = UsersMatches.objects.filter(
+#     (Q(user_main=user) | Q(user_requested=user))
+# )
+# from django.db.models import Q
+# from django.utils.timezone import now
+#
+# matches = UsersMatches.objects.filter(
+#     (Q(user_main=user) | Q(user_requested=user))
+# )
+# from wish.views import get_random_wish
+#
+# random_wish = get_random_wish(user)
+# import random
+#
+# days_to_finished = random.randint(5, 10)
+# from django.utils.timezone import now
+# from datetime import timedelta
+#
+# target_date = now() + timedelta(days=days_to_finished)
+#
+# active_wish = ActiveWish.objects.create(name_wish=random_wish,
+#                                         user_to_execute_wish=user,
+#                                         user_whose_wish_to_execute=matches.first().user_requested,
+#                                         expiration=target_date)

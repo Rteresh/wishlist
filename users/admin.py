@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from django.contrib import admin
 
-from users.models import EmailVerification, User, RequestMatchVerification, UserMatchCreate
+from users.models import EmailVerification, User, RequestMatchVerification, UsersMatches
 from wish.admin import WishAdmin
 
 
@@ -16,7 +16,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(UserMatchCreate)
+@admin.register(UsersMatches)
 class UserMatchAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_main', 'user_requested',)
     fields = ('user_main', 'user_requested', 'created_at',)
