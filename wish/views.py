@@ -62,20 +62,22 @@ class MakeWishList(FormView):
 
 @login_required
 def create_active_wish(request):
-    user = request.user
+    user = User.objects.get(id=request.user.id)
     matches = UsersMatches.objects.filter(
         (Q(user_main=user) | Q(user_requested=user))
     )
     random_wish = get_random_wish(user)
     days_to_finished = random.randint(5, 10)
     target_date = now() + timedelta(days=days_to_finished)
-    active_wish = ActiveWish.objects.create(name_wish=random_wish,
-                                            user_to_execute_wish=user,
-                                            user_whose_wish_to_execute=matches.first().user_requested,
-                                            expiration=target_date)
+    if user.active_wishes().exists():
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-    context = {'active_wish': active_wish}
-    return render(request, 'wish/test_active_wish.html', context)
+    ActiveWish.objects.create(name_wish=random_wish,
+                              user_to_execute_wish=user,
+                              user_whose_wish_to_execute=matches.first().user_requested,
+                              expiration=target_date)
+
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
 def get_random_wish(user):
@@ -87,6 +89,19 @@ def get_random_wish(user):
         return HttpResponseRedirect('У вас нет желаний в вашем списке')
     random_wish = wishes.order_by('?').first()
     return random_wish
+
+
+def complete_wish(request):
+    user = User.objects.get(id=request.user.id)
+    # if request.user.user_to_execute_wish.exists():
+    active_wish = ActiveWish.objects.get(user_to_execute_wish=user)
+    active_wish.wish_execution_state = True
+    active_wish.save()
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+def checkout_wish(request):
+    user = User.objects.get(id=request.user.id)
 
 #
 # from users.models import User, UsersMatches

@@ -15,13 +15,14 @@ Including another URLconf
 """
 from django.urls import path
 
-from wish.views import IndexView, MatchFormView, MakeWishList, create_active_wish
+from wish.views import IndexView, MatchFormView, MakeWishList, create_active_wish, complete_wish
 
 app_name = 'wish'
 
 urlpatterns = [
-    # Users
+    # Wish
     path('', MatchFormView.as_view(), name='wishes'),
     path('makewish', MakeWishList.as_view(), name='wish_list'),
-    path('active_wish', create_active_wish, name='active_wish')
+    path('active_wish', create_active_wish, name='active_wish'),
+    path('complete_wish', complete_wish, name='complete_wish'),
 ]

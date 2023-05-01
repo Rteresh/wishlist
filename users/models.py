@@ -29,6 +29,10 @@ class User(AbstractUser):
         User.objects.filter(matched_user=self).update(is_matched=False)
         super().delete(*args, **kwargs)
 
+    def active_wishes(self):
+        from wish.models import ActiveWish
+        return ActiveWish.objects.filter(user_to_execute_wish=self)
+
 
 class EmailVerification(models.Model):
     code = models.UUIDField(unique=True)
