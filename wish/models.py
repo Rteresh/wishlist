@@ -38,7 +38,7 @@ class ActiveWish(models.Model):
 
 class HistoryExecutionWishes(models.Model):
     user_to_execute_wish = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    wish = models.ForeignKey(to=ActiveWish, on_delete=models.CASCADE)
+    wish = models.ForeignKey(to=Wish, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

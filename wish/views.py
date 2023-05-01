@@ -16,7 +16,7 @@ from users.models import User, UsersMatches
 from users.forms import MatchForm
 
 from wish.forms import WishForm
-from wish.models import Wish, ActiveWish
+from wish.models import Wish, ActiveWish, HistoryExecutionWishes
 
 
 # Create your views here.
@@ -101,7 +101,15 @@ def complete_wish(request):
 
 
 def checkout_wish(request):
-    user = User.objects.get(id=request.user.id)
+    user = User.objects.get(id=request.user.id).matched_user
+    active_wish = user.active_wishes().first()
+    if active_wish.wish_execution_state:
+        HistoryExecutionWishes.objects.create(
+            user_to_execute_wish=user,
+            wish=active_wish.name_wish,
+        )
+        active_wish.delete()
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 #
 # from users.models import User, UsersMatches

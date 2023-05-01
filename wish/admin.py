@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from wish.models import Wish, ActiveWish
+from wish.models import Wish, ActiveWish, HistoryExecutionWishes
 
 
 # Register your models here.
@@ -19,3 +19,9 @@ class WishAdmin(admin.TabularInline):
 
 
 admin.site.register(ActiveWish)
+
+
+@admin.register(HistoryExecutionWishes)
+class HistoryExecutionWishesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'wish', 'user_to_execute_wish',)
+    fields = ('id', 'wish', 'user_to_execute_wish',)
