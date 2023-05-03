@@ -31,36 +31,12 @@ HELLO, {{ request.user.username }}
     <a href="{% url 'wish:wish_list' %}">
         Желания
     </a>
+    <a href="{% url 'wish:profile' user.id %}">
+        Профиль
+    </a>
 {% endif %}
 
-{% if user.active_wishes %}
-    {% if user.active_wishes.first.wish_execution_state == False %}
-        <form action="{% url 'wish:complete_wish' %}" method="post">
-            {% csrf_token %}
-            <button type="submit">Я выполнил желание</button>
-        </form>
-    {% endif %}
-{% else %}
-    <p>У вас нет активных желаний</p>
-{% endif %}
 
-{% if not user.active_wishes %}
-    <form action="{% url 'wish:active_wish' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Я хочу выполнить желание</button>
-    </form>
-{% else %}
-    <p>У меня уже есть желания</p>
-{% endif %}
-
-{% if user.matched_user %}
-    {% if user.matched_user.active_wishes.first.wish_execution_state == True %}
-        <form action="{% url 'wish:checkout_wish' %}" method="post">
-            {% csrf_token %}
-            <button type="submit">Подтвердить выполнение</button>
-        </form>
-    {% endif %}
-{% endif %}
 
 {% for user in users %}
     <div class="card mb-3">

@@ -1,7 +1,7 @@
-from users.models import User
+from wish.models import ActiveWish
 
 
-def active_complete_wish(request):
-    wish = User.objects.get(id=request.user.id). \
-        matched_user.active_wishes().first()
-    return {"wish": wish}
+def get_active_wish(request):
+    user = request.user
+    active_wish = ActiveWish.objects.filter(user_to_execute_wish=user.id)
+    return {'active_wish': active_wish if user.is_authenticated and active_wish.exists() else []}

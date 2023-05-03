@@ -42,7 +42,7 @@ class HistoryExecutionWishes(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.wish.name_wish.tittle}'
+        return f'{self.wish.tittle}'
 
     class Meta:
         verbose_name = 'Выполненные желания'

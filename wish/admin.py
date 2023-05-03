@@ -19,9 +19,4 @@ class WishAdmin(admin.TabularInline):
 
 
 admin.site.register(ActiveWish)
-
-
-@admin.register(HistoryExecutionWishes)
-class HistoryExecutionWishesAdmin(admin.ModelAdmin):
-    list_display = ('id', 'wish', 'user_to_execute_wish',)
-    fields = ('id', 'wish', 'user_to_execute_wish',)
+admin.site.register(HistoryExecutionWishes)

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+
+</head>
+<body>
+<a href="{% url 'index' %}">
+    index
+</a>
+
+HELLO, {{ request.user.username }}
+
+<div>История
+   {% for wish in history %}
+    {{ wish.wish }}
+{% endfor %}
+</div>
+
+
+
+
+{% if user.is_matched %}
+    <div>
+        Мой матч с {{ user.matched_user }}
+        <form action="{% url 'wish:detected_match' %}" method="post">
+            {% csrf_token %}
+            <p>
+                Разорвать пару с: {{ user.matched_user }}
+            </p>
+            <button type="submit">Разрываем</button>
+        </form>
+    </div>
+{% else %}
+    <div>
+        <a href="{% url 'wish:wishes' %}"> Создать пару </a>
+    </div>
+{% endif %}
+
+{% if active_wish %}
+    {% if active_wish.first.wish_execution_state == False %}
+        <form action="{% url 'wish:complete_wish' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Я выполнил желание</button>
+        </form>
+    {% endif %}
+{% else %}
+    <p>У вас нет активных желаний</p>
+{% endif %}
+{% if user.is_matched %}
+    {% if active_wish %}
+        <p>У меня уже есть желания {{ active_wish.first.name_wish }}</p>
+    {% else %}
+        <form action="{% url 'wish:active_wish' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Я хочу выполнить желание</button>
+        </form>
+    {% endif %}
+{% endif %}
+
+{% if user.matched_user %}
+    {% if user.matched_user.active_wishes.first.wish_execution_state == True %}
+        <form action="{% url 'wish:checkout_wish' %}" method="post">
+            {% csrf_token %}
+            <p>
+                {{ user.matched_user }} Выполнил желание: {{ user.matched_user.active_wishes.first.name_wish }}
+            </p>
+            <button type="submit">Подтвердить выполнение</button>
+        </form>
+    {% endif %}
+{% endif %}
+
+{% if active_wish %}
+    {% if not active_wish.first.wish_execution_state %}
+        <p>{{ active_wish.first.name_wish }}</p>
+        <p>Оставшееся время до истечения желания:</p>
+        <div id="countdown" style="font-size: 20px; font-weight: bold; color: red;"></div>
+    {% endif %}
+{% endif %}
+</body>
+{% if active_wish %}
+    <script>
+        var countdownElement = document.getElementById('countdown');
+        var expirationDate = new Date('{{ active_wish.first.expiration|date:"Y-m-d H:i:s" }}');
+        var timer = setInterval(function () {
+            var now = new Date();
+            var diff = Math.floor((expirationDate - now) / 1000);
+            if (diff <= 0) {
+                clearInterval(timer);
+                countdownElement.innerHTML = "Время истекло!";
+            } else {
+                var days = Math.floor(diff / 86400);
+                var hours = Math.floor((diff % 86400) / 3600);
+                var minutes = Math.floor((diff % 3600) / 60);
+                var seconds = diff % 60;
+                countdownElement.innerHTML = days + " дней " + hours + " часов " + minutes + " минут " + seconds + " секунд";
+            }
+        }, 1000);
+    </script>
+{% endif %}

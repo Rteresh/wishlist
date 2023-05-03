@@ -77,6 +77,25 @@ class UsersMatches(models.Model):
     def __str__(self):
         return f"Пара {self.user_main.username} и  {self.user_requested.username}"
 
+    def delete(self, *args, **kwargs):
+        # меняем состояние у пользователей, если они существуют
+        try:
+            self.user_main.is_matched = False
+            self.user_main.matched_user = None
+            self.user_main.save()
+
+        except User.DoesNotExist:
+            pass
+
+        try:
+            self.user_requested.is_matched = False
+            self.user_requested.matched_user = None
+            self.user_requested.save()
+        except User.DoesNotExist:
+            pass
+
+        super().delete(*args, **kwargs)
+
 
 class RequestMatchVerification(models.Model):
     code = models.UUIDField(unique=True)

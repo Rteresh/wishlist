@@ -31,6 +31,25 @@ class IndexView(TemplateView):
         return context
 
 
+class ActiveWishView(TemplateView):
+    template_name = 'wish/active_wish.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.id != self.kwargs['pk']:
+            print(self.kwargs['pk'])
+            # If the user is not accessing their own profile, redirect them to the login page
+            return HttpResponseRedirect(reverse_lazy('wish:profile', args=(request.user.id,)))
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)  # Include the **kwargs argument
+        user_id = self.kwargs['pk']
+        user = User.objects.get(id=user_id)
+        context['history'] = HistoryExecutionWishes.objects.filter(user_to_execute_wish=user)
+        return context
+
+
 class MatchFormView(SuccessMessageMixin, FormView):
     template_name = 'wish/succes_match.html'
     form_class = MatchForm
@@ -74,7 +93,7 @@ def create_active_wish(request):
 
     ActiveWish.objects.create(name_wish=random_wish,
                               user_to_execute_wish=user,
-                              user_whose_wish_to_execute=matches.first().user_requested,
+                              user_whose_wish_to_execute=user.matched_user,
                               expiration=target_date)
 
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
@@ -93,10 +112,12 @@ def get_random_wish(user):
 
 def complete_wish(request):
     user = User.objects.get(id=request.user.id)
-    # if request.user.user_to_execute_wish.exists():
     active_wish = ActiveWish.objects.get(user_to_execute_wish=user)
-    active_wish.wish_execution_state = True
-    active_wish.save()
+    if active_wish.expiration > now():
+        active_wish.wish_execution_state = True
+        active_wish.save()
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
@@ -109,6 +130,17 @@ def checkout_wish(request):
             wish=active_wish.name_wish,
         )
         active_wish.delete()
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+def detected_match(request):
+    user = User.objects.get(id=request.user.id)
+    if user.is_matched:
+        matches = UsersMatches.objects.filter(
+            (Q(user_main=user) | Q(user_requested=user))
+        )
+        matches.first().delete()
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 #
