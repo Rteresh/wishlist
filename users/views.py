@@ -6,8 +6,9 @@ from django.views.generic.edit import CreateView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
-from users.models import User, EmailVerification, RequestMatchVerification, UsersMatches
+from users.models import User, EmailVerification, RequestMatchVerification, MatchPair
 from users.forms import UserRegistrationForm, UserAuthForm
+from wish.models import HistoryExecutionWishes
 
 
 # Create your views here.
@@ -26,6 +27,20 @@ class UserLoginView(LoginView):
     tittle = 'Login'
 
 
+class ProfileVIew(TemplateView):
+    # Будет ProfileView/Перенести в users.view
+    template_name = 'wish/active_wish.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        """Метод dispatch выполняет проверку, что пользователь, запрашивающий страницу, имеет право на просмотр
+        профиля. Если пользователь не имеет права просмотра, то он будет перенаправлен на страницу входа."""
+        if request.user.id != self.kwargs['pk']:
+            # If the user is not accessing their own profile, redirect them to the login page
+            return HttpResponseRedirect(reverse_lazy('users:profile', args=(request.user.id,)))
+
+        return super().dispatch(request, *args, **kwargs)
+
+
 class EmailVerificationView(SuccessMessageMixin, TemplateView):
     tittle = 'Верификация почты'
     template_name = 'users/email_verification.html'
@@ -34,7 +49,7 @@ class EmailVerificationView(SuccessMessageMixin, TemplateView):
         code = kwargs['code']
         user = User.objects.get(email=kwargs['email'])
         email_verifications = EmailVerification.objects.filter(user=user, code=code)
-        if email_verifications.exists() and not email_verifications.first().is_expired():
+        if email_verifications.exists() and not email_verifications.first().is_expired_email_verification():
             if user.is_verified_email:
                 messages.success(request, 'Вы уже верифицированы')
                 return HttpResponseRedirect(reverse('users:login'))
@@ -86,11 +101,11 @@ class UserMatchVerificationView(TemplateView):
         except RequestMatchVerification.DoesNotExist:
             return HttpResponseBadRequest('Invalid code')
 
-        if match_request_verification is not None and not match_request_verification.is_expired():
+        if match_request_verification is not None and not match_request_verification.is_expired_email_verification():
             user1 = match_request_verification.main_user
             user2 = match_request_verification.requested_user
 
-            UsersMatches.objects.create(user_main=user1, user_requested=user2)
+            MatchPair.objects.create(user1=user1, user2=user2)
 
             user_change(main_user=user1, matched_user=user2)
             user_change(main_user=user2, matched_user=user1)

@@ -18,7 +18,6 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     is_matched = models.BooleanField(default=False)
     matched_user = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='match')
-    count_attempts_in_week = models.IntegerField(default=0)
 
     def __str__(self):
         return self.username
@@ -29,7 +28,7 @@ class User(AbstractUser):
         User.objects.filter(matched_user=self).update(is_matched=False)
         super().delete(*args, **kwargs)
 
-    def active_wishes(self):
+    def get_active_wishes(self):
         from wish.models import ActiveWish
         return ActiveWish.objects.filter(user_to_execute_wish=self)
 
@@ -62,39 +61,39 @@ class EmailVerification(models.Model):
             fail_silently=False,
         )
 
-    def is_expired(self):
+    def is_expired_email_verification(self):
         return self.expiration <= now()
 
 
-class UsersMatches(models.Model):
-    user_main = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user1')
-    user_requested = models.ForeignKey(User, on_delete=models.CASCADE, related_name='matches_as_user2')
-    created_at = models.DateTimeField(auto_now_add=True)
+class MatchPair(models.Model):
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='match_pair')
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, )
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user_main', 'user_requested')
+        unique_together = ('user1', 'user2')
 
     def __str__(self):
-        return f"Пара {self.user_main.username} и  {self.user_requested.username}"
+        return f"Пара между пользователем:{self.user1.username} и пользователем:{self.user2.username}"
 
     def delete(self, *args, **kwargs):
         # меняем состояние у пользователей, если они существуют
         try:
-            self.user_main.is_matched = False
-            self.user_main.matched_user = None
-            self.user_main.save()
-            if self.user_main.active_wishes():
-                self.user_main.active_wishes().delete()
+            self.user1.is_matched = False
+            self.user1.matched_user = None
+            self.user1.save()
+            if self.user1.get_active_wishes():
+                self.user1.get_active_wishes().delete()
 
         except User.DoesNotExist:
             pass
 
         try:
-            self.user_requested.is_matched = False
-            self.user_requested.matched_user = None
-            self.user_requested.save()
-            if self.user_requested.active_wishes():
-                self.user_requested.active_wishes().delete()
+            self.user2.is_matched = False
+            self.user2.matched_user = None
+            self.user2.save()
+            if self.user2.get_active_wishes():
+                self.user2.get_active_wishes().delete()
         except User.DoesNotExist:
             pass
 
@@ -116,7 +115,7 @@ class RequestMatchVerification(models.Model):
         verbose_name = 'Верификацию'
         verbose_name_plural = 'Создание пары'
 
-    def send_email_to_response_match(self):
+    def send_verification_email(self):
         link = reverse('users:match_verification', kwargs={'username': self.requested_user.username,
                                                            'code': self.code})
         verification_link = f'{settings.DOMAIN_NAME}{link}'
@@ -137,5 +136,5 @@ class RequestMatchVerification(models.Model):
         self.email_sent = True
         self.save()
 
-    def is_expired(self):
+    def is_expired_email_verification(self):
         return self.expiration <= now()

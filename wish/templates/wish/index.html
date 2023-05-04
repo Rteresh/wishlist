@@ -31,7 +31,7 @@ HELLO, {{ request.user.username }}
     <a href="{% url 'wish:wish_list' %}">
         Желания
     </a>
-    <a href="{% url 'wish:profile' user.id %}">
+    <a href="{% url 'users:profile' user.id %}">
         Профиль
     </a>
 {% endif %}

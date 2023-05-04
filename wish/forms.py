@@ -17,6 +17,6 @@ class WishForm(forms.ModelForm):
     class Meta:
         model = Wish
         fields = (
-            'tittle',
+            'title',
             'description',
         )

@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserChangeForm, UserCr
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 
-from users.models import User, EmailVerification, UsersMatches, RequestMatchVerification
+from users.models import User, EmailVerification, MatchPair, RequestMatchVerification
 
 
 class UserAuthForm(AuthenticationForm):
@@ -110,6 +110,6 @@ class MatchForm(forms.Form):
             requested_user=requested_user,
             expiration=expiration
         )
-        record.send_email_to_response_match()
+        record.send_verification_email()
         message = 'Запрос отправлен успешно'
         return True, message

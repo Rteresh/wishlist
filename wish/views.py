@@ -2,17 +2,14 @@ import random
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, reverse
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import TemplateView, FormView
 from django.contrib import messages
 from django.db.models import Q
 from django.utils.timezone import now
 
-from users.models import User, UsersMatches
+from users.models import User, MatchPair
 from users.forms import MatchForm
 
 from wish.forms import WishForm
@@ -31,32 +28,10 @@ class IndexView(TemplateView):
         return context
 
 
-class ActiveWishView(TemplateView):
-    # Будет ProfileView/Перенести в users.view
-    template_name = 'wish/active_wish.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        """Метод dispatch выполняет проверку, что пользователь, запрашивающий страницу, имеет право на просмотр
-        профиля. Если пользователь не имеет права просмотра, то он будет перенаправлен на страницу входа."""
-        if request.user.id != self.kwargs['pk']:
-            print(self.kwargs['pk'])
-            # If the user is not accessing their own profile, redirect them to the login page
-            return HttpResponseRedirect(reverse_lazy('wish:profile', args=(request.user.id,)))
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)  # Include the **kwargs argument
-        user_id = self.kwargs['pk']
-        user = User.objects.get(id=user_id)
-        context['history'] = HistoryExecutionWishes.objects.filter(user_to_execute_wish=user)
-        return context
-
-
 class MatchFormView(FormView):
     """Класс MatchFormView наследуется от FormView, и отвечает за обработку формы подбора пары (MatchForm)."""
 
-    template_name = 'wish/succes_match.html'  # переименовать html
+    template_name = 'wish/success_match.html'  # переименовать html
     form_class = MatchForm
     success_url = reverse_lazy('wish:wishes')
 
@@ -106,7 +81,7 @@ def create_active_wish(request):
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
     days_to_finished = random.randint(5, 10)
     target_date = now() + timedelta(days=days_to_finished)
-    if user.active_wishes().exists():
+    if user.get_active_wishes().exists():
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
     ActiveWish.objects.create(name_wish=random_wish,
@@ -131,7 +106,7 @@ def complete_wish(request):
     user = User.objects.get(id=request.user.id)
     active_wish = ActiveWish.objects.get(user_to_execute_wish=user)
     if active_wish.expiration > now():
-        active_wish.wish_execution_state = True
+        active_wish.is_executed = True
         active_wish.save()
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
@@ -142,15 +117,15 @@ def checkout_wish(request):
     """Принимает запрос пользователя и подтверждает выполнение активного желание"""
 
     user = User.objects.get(id=request.user.id)
-    active_wish = user.matched_user.active_wishes().first()
-    if active_wish.wish_execution_state:
+    active_wish = user.matched_user.get_active_wishes().first()
+    if active_wish.is_executed:
         HistoryExecutionWishes.objects.create(
             user_to_execute_wish=user.matched_user,
-            wish=active_wish.name_wish,
+            wish=active_wish.wish,
         )
         HistoryExecutionWishes.objects.create(
             user_to_execute_wish=user,
-            wish=active_wish.name_wish
+            wish=active_wish.wish
         )
         active_wish.delete()
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
@@ -160,7 +135,7 @@ def detected_match(request):
     """Разрывание пары"""
     user = User.objects.get(id=request.user.id)
     if user.is_matched:
-        matches = UsersMatches.objects.filter(
+        matches = MatchPair.objects.filter(
             (Q(user_main=user) | Q(user_requested=user))
         )
         matches.first().delete()
