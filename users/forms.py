@@ -10,6 +10,7 @@ from users.models import User, EmailVerification, UsersMatches, RequestMatchVeri
 
 
 class UserAuthForm(AuthenticationForm):
+    """Форма ацетификации пользователя"""
     username = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control py-4',
         'placeholder': 'Введите имя пользователя'
@@ -28,6 +29,7 @@ class UserAuthForm(AuthenticationForm):
 
 
 class UserRegistrationForm(UserCreationForm):
+    """Форма регистрации пользователя"""
     first_name = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control py-4',
         'placeholder': 'Введите имя'
@@ -65,6 +67,8 @@ class UserRegistrationForm(UserCreationForm):
         )
 
     def save(self, commit=True):
+        """Отправка запроса на эл.почту и создание записи для верификации эл.почты"""
+
         user = super().save(commit=True)
         # email verification
         expiration = now() + timedelta(hours=48)
@@ -74,12 +78,16 @@ class UserRegistrationForm(UserCreationForm):
 
 
 class MatchForm(forms.Form):
+    """Определяет форму для запроса на соответствие (match request) между пользователями и отправляет письмо для
+    подтверждения запроса на почту"""
     username = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control py-4',
         'placeholder': 'Введите имя пользователя'
     }))
 
     def send_email_and_create_record(self, user):
+        """Отправка запроса на эл.почту и создание записи для верификации запроса на создании пары"""
+
         username = self.cleaned_data['username']
         requested_user = User.objects.filter(username=username).first()
         if not requested_user:

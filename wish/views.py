@@ -32,9 +32,12 @@ class IndexView(TemplateView):
 
 
 class ActiveWishView(TemplateView):
+    # Будет ProfileView/Перенести в users.view
     template_name = 'wish/active_wish.html'
 
     def dispatch(self, request, *args, **kwargs):
+        """Метод dispatch выполняет проверку, что пользователь, запрашивающий страницу, имеет право на просмотр
+        профиля. Если пользователь не имеет права просмотра, то он будет перенаправлен на страницу входа."""
         if request.user.id != self.kwargs['pk']:
             print(self.kwargs['pk'])
             # If the user is not accessing their own profile, redirect them to the login page
@@ -50,12 +53,19 @@ class ActiveWishView(TemplateView):
         return context
 
 
-class MatchFormView(SuccessMessageMixin, FormView):
-    template_name = 'wish/succes_match.html'
+class MatchFormView(FormView):
+    """Класс MatchFormView наследуется от FormView, и отвечает за обработку формы подбора пары (MatchForm)."""
+
+    template_name = 'wish/succes_match.html'  # переименовать html
     form_class = MatchForm
     success_url = reverse_lazy('wish:wishes')
 
     def form_valid(self, form):
+        """Метод form_valid(self, form) вызывается, если форма прошла валидацию. Метод получает данные формы,
+        извлекает объект пользователя (user) и проверяет, не имеет ли пользователь уже пару (is_matched). Если у
+        пользователя уже есть пара, то выводится сообщение об ошибке, иначе отправляется письмо с уведомлением и
+        создается запись в базе данных о запросе на подбор пары. В случае успеха выводится сообщение об успешной
+        отправке письма. Если возникают ошибки, выводится сообщение об ошибке."""
         user = User.objects.get(id=self.request.user.id)
         if not user.is_matched:
             success, message = form.send_email_and_create_record(user)
@@ -69,6 +79,8 @@ class MatchFormView(SuccessMessageMixin, FormView):
 
 
 class MakeWishList(FormView):
+    """Класс MakeWishList представляет собой форму, которая отображает страницу создания нового желания. Пользователь
+    может заполнить форму и отправить ее, чтобы сохранить новое желание в базе данных."""
     template_name = 'wish/make_wish_list.html'
     form_class = WishForm
     success_url = reverse_lazy('wish:wish_list')
@@ -84,6 +96,10 @@ class MakeWishList(FormView):
 
 @login_required
 def create_active_wish(request):
+    """Функция create_active_wish создает активное желание для пользователя, который должен выполнить желание пары.
+    Если пользователь уже имеет активное желание, то функция перенаправляет его на предыдущую страницу.
+
+"""
     user = User.objects.get(id=request.user.id)
     random_wish = get_random_wish(user)
     if random_wish is None:
@@ -102,7 +118,7 @@ def create_active_wish(request):
 
 
 def get_random_wish(user):
-    # Если у пользователя нет ни одного совпадения, возвращаем None
+    """Возвращает случайное желание пары"""
     wishes = Wish.objects.filter(user=user.matched_user)
     if not wishes:
         return None
@@ -111,6 +127,7 @@ def get_random_wish(user):
 
 
 def complete_wish(request):
+    """Принимает запрос пользователя и отмечает активное желание как выполненное."""
     user = User.objects.get(id=request.user.id)
     active_wish = ActiveWish.objects.get(user_to_execute_wish=user)
     if active_wish.expiration > now():
@@ -122,6 +139,8 @@ def complete_wish(request):
 
 
 def checkout_wish(request):
+    """Принимает запрос пользователя и подтверждает выполнение активного желание"""
+
     user = User.objects.get(id=request.user.id)
     active_wish = user.matched_user.active_wishes().first()
     if active_wish.wish_execution_state:
@@ -138,6 +157,7 @@ def checkout_wish(request):
 
 
 def detected_match(request):
+    """Разрывание пары"""
     user = User.objects.get(id=request.user.id)
     if user.is_matched:
         matches = UsersMatches.objects.filter(

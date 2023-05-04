@@ -47,15 +47,36 @@ class EmailVerificationView(SuccessMessageMixin, TemplateView):
 
 
 def user_change(main_user, matched_user):
+    """Функция user_change принимает два аргумента: main_user (пользователь, который запросил соответствие) и
+    matched_user (пользователь, с которым он совпал). Функция устанавливает флаг is_matched пользователя main_user в
+    значение True и сохраняет его в базе данных. Также сохраняется ссылка на matched_user в поле matched_user объекта
+    main_user.
+"""
     main_user.is_matched = True
     main_user.matched_user = matched_user
     main_user.save()
 
 
 class UserMatchVerificationView(TemplateView):
+    """
+      View class that handles the user match verification process. When a user clicks on the link in their email, they are
+      directed to this view. It checks the validity of the verification code in the URL, and if it is valid and not expired,
+      the two users are matched, and their information is stored in the database.
+      """
     template_name = 'wish/test.html'
 
     def get(self, request, *args, **kwargs):
+        """
+                Handle GET requests to the view.
+
+                Parameters:
+                    request (HttpRequest): The HTTP request object.
+                    args: Additional arguments.
+                    kwargs: Additional keyword arguments.
+
+                Returns:
+                    HttpResponse: The HTTP response object.
+                """
         if 'code' not in kwargs:
             return HttpResponseBadRequest('Missing required parameter "code"')
 
