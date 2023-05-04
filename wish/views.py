@@ -56,12 +56,15 @@ class MatchFormView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('wish:wishes')
 
     def form_valid(self, form):
-        user = self.request.user
-        success, message = form.send_email_and_create_record(user)
-        if success:
-            messages.success(self.request, message)
+        user = User.objects.get(id=self.request.user.id)
+        if not user.is_matched:
+            success, message = form.send_email_and_create_record(user)
+            if success:
+                messages.success(self.request, message)
+            else:
+                messages.warning(self.request, message)
         else:
-            messages.warning(self.request, message)
+            messages.warning(self.request, 'Вы уже состоите в паре ')
         return super().form_valid(form)
 
 
@@ -82,10 +85,9 @@ class MakeWishList(FormView):
 @login_required
 def create_active_wish(request):
     user = User.objects.get(id=request.user.id)
-    matches = UsersMatches.objects.filter(
-        (Q(user_main=user) | Q(user_requested=user))
-    )
     random_wish = get_random_wish(user)
+    if random_wish is None:
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
     days_to_finished = random.randint(5, 10)
     target_date = now() + timedelta(days=days_to_finished)
     if user.active_wishes().exists():
@@ -100,12 +102,10 @@ def create_active_wish(request):
 
 
 def get_random_wish(user):
-    matches = UsersMatches.objects.filter(
-        (Q(user_main=user) | Q(user_requested=user))
-    )  # Если у пользователя нет ни одного совпадения, возвращаем None
-    wishes = Wish.objects.filter(user=matches.first().user_requested)
+    # Если у пользователя нет ни одного совпадения, возвращаем None
+    wishes = Wish.objects.filter(user=user.matched_user)
     if not wishes:
-        return HttpResponseRedirect('У вас нет желаний в вашем списке')
+        return None
     random_wish = wishes.order_by('?').first()
     return random_wish
 
@@ -122,12 +122,16 @@ def complete_wish(request):
 
 
 def checkout_wish(request):
-    user = User.objects.get(id=request.user.id).matched_user
-    active_wish = user.active_wishes().first()
+    user = User.objects.get(id=request.user.id)
+    active_wish = user.matched_user.active_wishes().first()
     if active_wish.wish_execution_state:
         HistoryExecutionWishes.objects.create(
-            user_to_execute_wish=user,
+            user_to_execute_wish=user.matched_user,
             wish=active_wish.name_wish,
+        )
+        HistoryExecutionWishes.objects.create(
+            user_to_execute_wish=user,
+            wish=active_wish.name_wish
         )
         active_wish.delete()
     return HttpResponseRedirect(request.META['HTTP_REFERER'])

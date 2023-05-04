@@ -83,6 +83,8 @@ class UsersMatches(models.Model):
             self.user_main.is_matched = False
             self.user_main.matched_user = None
             self.user_main.save()
+            if self.user_main.active_wishes():
+                self.user_main.active_wishes().delete()
 
         except User.DoesNotExist:
             pass
@@ -91,6 +93,8 @@ class UsersMatches(models.Model):
             self.user_requested.is_matched = False
             self.user_requested.matched_user = None
             self.user_requested.save()
+            if self.user_requested.active_wishes():
+                self.user_requested.active_wishes().delete()
         except User.DoesNotExist:
             pass
 
