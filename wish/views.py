@@ -149,7 +149,7 @@ def checkout_wish_view(request):
 
 
 def detected_match_view(request):
-    """Разрывание пары"""
+    """Разрывание пары test"""
     user = User.objects.get(id=request.user.id)
     if user.is_matched:
         matches = user.matchpair_set.first()
