@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView
 from django.contrib import messages
 from django.utils.timezone import now
@@ -27,6 +28,7 @@ class IndexView(TemplateView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class WishListView(TemplateView):
     template_name = 'wish/list_wishes.html'
 
@@ -37,6 +39,7 @@ class WishListView(TemplateView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class WishListHistoryView(TemplateView):
     template_name = 'wish/history.html'
 
@@ -48,6 +51,7 @@ class WishListHistoryView(TemplateView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class MatchFormView(FormView):
     """Класс MatchFormView наследуется от FormView, и отвечает за обработку формы подбора пары (MatchForm)."""
 
@@ -73,6 +77,7 @@ class MatchFormView(FormView):
         return super().form_valid(form)
 
 
+@method_decorator(login_required, name='dispatch')
 class MakeWishList(FormView):
     """Класс MakeWishList представляет собой форму, которая отображает страницу создания нового желания. Пользователь
     может заполнить форму и отправить ее, чтобы сохранить новое желание в базе данных."""
@@ -115,6 +120,8 @@ def create_active_wish_view(request):
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
+
+@login_required
 def get_random_wish(user):
     """Возвращает случайное желание пары"""
     wishes = Wish.objects.filter(user=user.matched_user)
@@ -124,6 +131,7 @@ def get_random_wish(user):
     return random_wish
 
 
+@login_required
 def complete_wish_view(request):
     """Принимает запрос пользователя и отмечает активное желание как выполненное."""
     user = User.objects.get(id=request.user.id)
@@ -136,6 +144,7 @@ def complete_wish_view(request):
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
+@login_required
 def checkout_wish_view(request):
     """Принимает запрос пользователя и подтверждает выполнение активного желание"""
 
@@ -148,6 +157,7 @@ def checkout_wish_view(request):
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
+@login_required
 def detected_match_view(request):
     """Разрывание пары test"""
     user = User.objects.get(id=request.user.id)
