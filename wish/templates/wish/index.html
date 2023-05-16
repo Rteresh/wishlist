@@ -28,12 +28,19 @@ HELLO, {{ request.user.username }}
     <a href="{% url 'users:logout' %}">
         logout
     </a>
-    <a href="{% url 'wish:wish_list' %}">
-        Желания
+    <a href="{% url 'wish:make_wish' %}">
+        Добавить желание
     </a>
     <a href="{% url 'users:profile' user.id %}">
         Профиль
     </a>
+    <a href="{% url 'wish:list_wish' %}">
+        Список желаний
+    </a>
+    <a href="{% url 'wish:history_wish' %}">
+        История желаний
+    </a>
+
 {% endif %}
 
 

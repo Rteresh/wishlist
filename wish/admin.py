@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from wish.models import Wish, ActiveWish, HistoryExecutionWishes
+from wish.models import Wish, ActiveWish
 
 
 admin.site.register(Wish)

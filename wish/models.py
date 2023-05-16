@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 from users.models import User
 
@@ -23,7 +24,7 @@ class ActiveWish(models.Model):
     executor = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='assigned_wishes')
     owner = models.ForeignKey(
         to=User, on_delete=models.CASCADE, related_name='created_wishes')
-    created_at = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now=True)
     expiration = models.DateTimeField()
     is_executed = models.BooleanField(default=False)
 
@@ -35,15 +36,36 @@ class ActiveWish(models.Model):
         verbose_name = 'Активные желания'
         verbose_name_plural = 'Активное желание'
 
+    def log_executed_wish_history(self):
+        """
+        Метод для логирования выполненных желаний пользователя.
+        """
+        wish_history = {
+            'wish': self.wish.__str__(),
+            'wish_description': self.wish.description,
+            'owner': self.owner.__str__(),
+            'created': self.created.strftime("%Y-%m-%d %H:%M:%S"),
+            'is_executed': self.is_executed,
+            'execution_date': now().strftime("%Y-%m-%d %H:%M:%S")
+        }
 
-class HistoryExecutionWishes(models.Model):
-    user_to_execute_wish = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    wish = models.ForeignKey(to=Wish, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True)
+        self.executor.wish_executed.append(wish_history)
+        self.executor.save()
 
-    def __str__(self):
-        return f'{self.wish.title}'
+    def log_wish_history(self):
+        """
+            Метод для логирования выполненных желаний пользователя.
+        """
 
-    class Meta:
-        verbose_name = 'Выполненные желания'
-        verbose_name_plural = 'Выполненное желание'
+        wish_history = {
+            'wish': self.wish.__str__(),
+            'wish_description': self.wish.description,
+            'created': self.created.strftime("%Y-%m-%d %H:%M:%S"),
+            'executor': self.executor.__str__(),
+            'is_executed': self.is_executed,
+            'execution_date': now().strftime("%Y-%m-%d %H:%M:%S")
+
+        }
+
+        self.owner.wish_history.append(wish_history)
+        self.owner.save()

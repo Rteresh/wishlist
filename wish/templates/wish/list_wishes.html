@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List_wishes</title>
+</head>
+<body>
+<a href="{% url 'index' %}">
+    index
+</a>
+{% for wish in list_wish %}
+    <li>
+        {{ wish }}
+    </li>
+{% endfor %}
+</body>
+</html>

@@ -18,6 +18,8 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     is_matched = models.BooleanField(default=False)
     matched_user = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='match')
+    wish_history = models.JSONField(default=list, null=True)
+    wish_executed = models.JSONField(default=list, null=True)
 
     def __str__(self):
         return self.username
@@ -30,7 +32,7 @@ class User(AbstractUser):
 
     def get_active_wishes(self):
         from wish.models import ActiveWish
-        return ActiveWish.objects.filter(user_to_execute_wish=self)
+        return ActiveWish.objects.filter(executor=self)
 
 
 class EmailVerification(models.Model):

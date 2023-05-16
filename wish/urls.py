@@ -15,17 +15,21 @@ Including another URLconf
 """
 from django.urls import path
 
-from wish.views import IndexView, MatchFormView, MakeWishList, create_active_wish, complete_wish, checkout_wish, \
-    detected_match
+from wish.views import IndexView, MatchFormView, MakeWishList, create_active_wish_view, complete_wish_view, \
+    checkout_wish_view, \
+    detected_match_view, WishListView, WishListHistoryView
 
 app_name = 'wish'
 
 urlpatterns = [
     # Wish
     path('', MatchFormView.as_view(), name='wishes'),
-    path('makewish', MakeWishList.as_view(), name='wish_list'),
-    path('active_wish', create_active_wish, name='active_wish'),
-    path('complete_wish', complete_wish, name='complete_wish'),
-    path('checkout_wish', checkout_wish, name='checkout_wish'),
-    path('detected_match', detected_match, name='detected_match'),
+    path('makewish', MakeWishList.as_view(), name='make_wish'),
+    path('active_wish', create_active_wish_view, name='active_wish'),
+    path('complete_wish', complete_wish_view, name='complete_wish'),
+    path('checkout_wish', checkout_wish_view, name='checkout_wish'),
+    path('detected_match', detected_match_view, name='detected_match'),
+    path('list_wish', WishListView.as_view(), name='list_wish'),
+    path('history_wish', WishListHistoryView.as_view(), name='history_wish'),
+
 ]

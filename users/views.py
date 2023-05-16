@@ -8,12 +8,11 @@ from django.contrib import messages
 
 from users.models import User, EmailVerification, RequestMatchVerification, MatchPair
 from users.forms import UserRegistrationForm, UserAuthForm
-from wish.models import HistoryExecutionWishes
 
 
 # Create your views here.
 
-class UsersRegistrationView(SuccessMessageMixin, CreateView):
+class UserRegistrationView(SuccessMessageMixin, CreateView):
     template_name = 'users/register.html'
     model = User
     form_class = UserRegistrationForm
@@ -24,12 +23,12 @@ class UsersRegistrationView(SuccessMessageMixin, CreateView):
 class UserLoginView(LoginView):
     template_name = 'users/login.html'
     form_class = UserAuthForm
-    tittle = 'Login'
+    title = 'Login'
 
 
-class ProfileVIew(TemplateView):
+class ProfileView(TemplateView):
     # Будет ProfileView/Перенести в users.view
-    template_name = 'wish/active_wish.html'
+    template_name = 'wish/profile.html'
 
     def dispatch(self, request, *args, **kwargs):
         """Метод dispatch выполняет проверку, что пользователь, запрашивающий страницу, имеет право на просмотр
@@ -42,7 +41,7 @@ class ProfileVIew(TemplateView):
 
 
 class EmailVerificationView(SuccessMessageMixin, TemplateView):
-    tittle = 'Верификация почты'
+    title = 'Верификация почты'
     template_name = 'users/email_verification.html'
 
     def get(self, request, *args, **kwargs):
@@ -61,7 +60,7 @@ class EmailVerificationView(SuccessMessageMixin, TemplateView):
             return HttpResponseRedirect(reverse('index'))
 
 
-def user_change(main_user, matched_user):
+def update_user_match_status(main_user, matched_user):
     """Функция user_change принимает два аргумента: main_user (пользователь, который запросил соответствие) и
     matched_user (пользователь, с которым он совпал). Функция устанавливает флаг is_matched пользователя main_user в
     значение True и сохраняет его в базе данных. Также сохраняется ссылка на matched_user в поле matched_user объекта
@@ -78,6 +77,7 @@ class UserMatchVerificationView(TemplateView):
       directed to this view. It checks the validity of the verification code in the URL, and if it is valid and not expired,
       the two users are matched, and their information is stored in the database.
       """
+
     template_name = 'wish/test.html'
 
     def get(self, request, *args, **kwargs):
@@ -91,11 +91,13 @@ class UserMatchVerificationView(TemplateView):
 
                 Returns:
                     HttpResponse: The HTTP response object.
-                """
+        """
+
         if 'code' not in kwargs:
             return HttpResponseBadRequest('Missing required parameter "code"')
 
         code = kwargs['code']
+
         try:
             match_request_verification = RequestMatchVerification.objects.get(code=code)
         except RequestMatchVerification.DoesNotExist:
@@ -107,6 +109,7 @@ class UserMatchVerificationView(TemplateView):
 
             MatchPair.objects.create(user1=user1, user2=user2)
 
-            user_change(main_user=user1, matched_user=user2)
-            user_change(main_user=user2, matched_user=user1)
+            update_user_match_status(main_user=user1, matched_user=user2)
+            update_user_match_status(main_user=user2, matched_user=user1)
+
         return super().get(request, *args, **kwargs)

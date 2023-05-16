@@ -1,0 +1,45 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+    <a href="{% url 'index' %}">
+        index
+    </a>
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Желания, которые я выполнил</h2>
+            {% for wish in my_completed_wishes %}
+                <div>_________</div>
+                <div>Название желания:{{ wish.wish }}</div>
+                <div>Описание желания: {{ wish.wish_description }}</div>
+                <div>Чье желание:{{ wish.owner }}</div>
+                <div>Когда было создано желание:{{ wish.created }}</div>
+                {% if wish.is_executed %}
+                    <div>Желание было выполнено: {{ wish.execution_date }}</div>
+                {% else %}
+                    <div>Желание не выполнено</div>
+                {% endif %}
+
+            {% empty %}
+
+                <p>Вы еще не выполнили ни одного желания</p>
+            {% endfor %}
+        </div>
+        <div class="col-md-6">
+            <h2>Желания, которые выполнили мои желания</h2>
+            {% for wish in wishes_completed_for_me %}
+                <div>_________</div>
+                <div>Название желания: {{ wish.wish }}</div>
+                <div>Описание желания: {{ wish.wish_description }}</div>
+                <div>Дата создания: {{ wish.created }}</div>
+                <div>Кто выполнил желание: {{ wish.executor }}</div>
+                {% if wish.is_executed %}
+                    <div>Желание было выполнено: {{ wish.execution_date }}</div>
+                {% else %}
+                    <div>Желание не выполнено</div>
+                {% endif %}
+            {% empty %}
+                <p>Ваши желания еще не были выполнены</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -3,17 +3,16 @@ from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, FormView
 from django.contrib import messages
-from django.db.models import Q
 from django.utils.timezone import now
 
-from users.models import User, MatchPair
+from users.models import User
 from users.forms import MatchForm
 
 from wish.forms import WishForm
-from wish.models import Wish, ActiveWish, HistoryExecutionWishes
+from wish.models import Wish, ActiveWish
 
 
 # Create your views here.
@@ -25,6 +24,27 @@ class IndexView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['users'] = User.objects.all()
+        return context
+
+
+class WishListView(TemplateView):
+    template_name = 'wish/list_wishes.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['list_wish'] = Wish.objects.filter(user_id=self.request.user.id)
+        # context['log_executed_wish_history'] = User.objects.get(id=self.request.user.id).wish_history.
+        return context
+
+
+class WishListHistoryView(TemplateView):
+    template_name = 'wish/history.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        user = User.objects.get(id=self.request.user.id)
+        context['my_completed_wishes'] = user.wish_executed
+        context['wishes_completed_for_me'] = user.wish_history
         return context
 
 
@@ -58,10 +78,13 @@ class MakeWishList(FormView):
     может заполнить форму и отправить ее, чтобы сохранить новое желание в базе данных."""
     template_name = 'wish/make_wish_list.html'
     form_class = WishForm
-    success_url = reverse_lazy('wish:wish_list')
+    success_url = reverse_lazy('wish:make_wish')
 
     def form_valid(self, form):
-        # Сохранение желания
+        if not self.request.user.is_authenticated:
+            # Если пользователь не аутентифицирован, перенаправляем его на страницу входа
+            return HttpResponseRedirect(reverse('users:login'))
+            # Сохранение желания
         wish = form.save(commit=False)
         wish.user = self.request.user
         wish.save()
@@ -70,7 +93,7 @@ class MakeWishList(FormView):
 
 
 @login_required
-def create_active_wish(request):
+def create_active_wish_view(request):
     """Функция create_active_wish создает активное желание для пользователя, который должен выполнить желание пары.
     Если пользователь уже имеет активное желание, то функция перенаправляет его на предыдущую страницу.
 
@@ -84,9 +107,9 @@ def create_active_wish(request):
     if user.get_active_wishes().exists():
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-    ActiveWish.objects.create(name_wish=random_wish,
-                              user_to_execute_wish=user,
-                              user_whose_wish_to_execute=user.matched_user,
+    ActiveWish.objects.create(wish=random_wish,
+                              executor=user,
+                              owner=user.matched_user,
                               expiration=target_date)
 
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
@@ -101,10 +124,10 @@ def get_random_wish(user):
     return random_wish
 
 
-def complete_wish(request):
+def complete_wish_view(request):
     """Принимает запрос пользователя и отмечает активное желание как выполненное."""
     user = User.objects.get(id=request.user.id)
-    active_wish = ActiveWish.objects.get(user_to_execute_wish=user)
+    active_wish = ActiveWish.objects.get(executor=user)
     if active_wish.expiration > now():
         active_wish.is_executed = True
         active_wish.save()
@@ -113,32 +136,24 @@ def complete_wish(request):
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
-def checkout_wish(request):
+def checkout_wish_view(request):
     """Принимает запрос пользователя и подтверждает выполнение активного желание"""
 
     user = User.objects.get(id=request.user.id)
     active_wish = user.matched_user.get_active_wishes().first()
     if active_wish.is_executed:
-        HistoryExecutionWishes.objects.create(
-            user_to_execute_wish=user.matched_user,
-            wish=active_wish.wish,
-        )
-        HistoryExecutionWishes.objects.create(
-            user_to_execute_wish=user,
-            wish=active_wish.wish
-        )
-        active_wish.delete()
+        active_wish.log_executed_wish_history()
+        active_wish.log_wish_history()
+        active_wish.wish.delete()
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
-def detected_match(request):
+def detected_match_view(request):
     """Разрывание пары"""
     user = User.objects.get(id=request.user.id)
     if user.is_matched:
-        matches = MatchPair.objects.filter(
-            (Q(user_main=user) | Q(user_requested=user))
-        )
-        matches.first().delete()
+        matches = user.matchpair_set.first()
+        matches.delete()
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
