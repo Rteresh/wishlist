@@ -8,6 +8,8 @@ from django.conf import settings
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
+from wishlist import constants
+
 
 # Create your models here.
 
@@ -21,6 +23,9 @@ class User(AbstractUser):
     wish_history = models.JSONField(default=list, null=True)
     wish_executed = models.JSONField(default=list, null=True)
 
+    is_premium = models.BooleanField(default=False)
+    count_wish = models.IntegerField(default=constants.COUNT_WISH)
+
     def __str__(self):
         return self.username
 
@@ -33,6 +38,21 @@ class User(AbstractUser):
     def get_active_wishes(self):
         from wish.models import ActiveWish
         return ActiveWish.objects.filter(executor=self)
+
+    def decrease_wish_quantity(self):
+        if self.count_wish > 0:
+            self.count_wish -= 1
+            self.save()
+
+    def increase_wish_quantity(self):
+        if self.is_premium:
+            count = constants.COUNT_PREMIUM_WISH
+        else:
+            count = constants.COUNT_WISH
+
+        if self.count_wish < count:
+            self.count_wish += 1
+            self.save()
 
 
 class EmailVerification(models.Model):

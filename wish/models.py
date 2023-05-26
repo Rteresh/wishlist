@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
+from django.core.mail import send_mail
+from django.conf import settings
 
 from users.models import User
 
@@ -69,3 +71,24 @@ class ActiveWish(models.Model):
 
         self.owner.wish_history.append(wish_history)
         self.owner.save()
+
+    def send_notify_email(self):
+        # link = reverse('users:match_verification', kwargs={'username': self.requested_user.username,
+        # 'code': self.code})
+        # verification_link = f'{settings.DOMAIN_NAME}{link}'
+        subject = f'Подтверждение выполненного задания от {self.executor}'
+        message = f'Для подтверждения выполнения данного задания ' \
+                  f'{self.wish}  от пользователя' \
+                  f'{self.executor} ' \
+                  f'перейдите по ссылке:----'
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[self.owner.email],
+            fail_silently=False,
+        )
+
+        # self.email_sent = True
+        # self.save()

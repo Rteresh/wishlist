@@ -86,15 +86,23 @@ class MakeWishList(FormView):
     success_url = reverse_lazy('wish:make_wish')
 
     def form_valid(self, form):
-        if not self.request.user.is_authenticated:
+        user = User.objects.get(id=self.request.user.id)
+        if not user.is_authenticated:
             # Если пользователь не аутентифицирован, перенаправляем его на страницу входа
             return HttpResponseRedirect(reverse('users:login'))
             # Сохранение желания
-        wish = form.save(commit=False)
-        wish.user = self.request.user
-        wish.save()
-
+        success, message = form.message_and_record(user)
+        if success:
+            messages.success(self.request, message)
+        else:
+            messages.warning(self.request, message)
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        user = User.objects.get(id=self.request.user.id)
+        context['count_wish'] = user.count_wish
+        return context
 
 
 @login_required
@@ -120,8 +128,6 @@ def create_active_wish_view(request):
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
-
-@login_required
 def get_random_wish(user):
     """Возвращает случайное желание пары"""
     wishes = Wish.objects.filter(user=user.matched_user)
@@ -138,6 +144,7 @@ def complete_wish_view(request):
     active_wish = ActiveWish.objects.get(executor=user)
     if active_wish.expiration > now():
         active_wish.is_executed = True
+        active_wish.send_notify_email()
         active_wish.save()
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
@@ -151,6 +158,7 @@ def checkout_wish_view(request):
     user = User.objects.get(id=request.user.id)
     active_wish = user.matched_user.get_active_wishes().first()
     if active_wish.is_executed:
+        user.increase_wish_quantity()
         active_wish.log_executed_wish_history()
         active_wish.log_wish_history()
         active_wish.wish.delete()
