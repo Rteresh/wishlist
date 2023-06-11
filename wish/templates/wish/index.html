@@ -21,7 +21,9 @@ HELLO, {{ request.user.username }}
 <div>
     <a href="{% url 'wish:wishes' %}"> wish </a>
 </div>
-
+<div>
+    <a href="{% url 'calendars:index' %}"> CALENDAR </a>
+</div>
 
 
 {% if user.is_authenticated %}

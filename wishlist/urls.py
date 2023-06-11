@@ -26,7 +26,10 @@ urlpatterns = [
 
     # Users
     path('users/', include('users.urls', namespace='users')),
-    path('wish/', include('wish.urls', namespace='wish'))
+    # Wish
+    path('wish/', include('wish.urls', namespace='wish')),
+    # Calendars
+    path('calendars/', include('calendars.urls', namespace='calendars')),
 
 ]
 

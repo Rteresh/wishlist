@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'vender/css/main.css' %}"/>
+<!-- Font-icon css-->
+<link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+<link href="{% static 'vender/js/calendar/main.css' %}" rel="stylesheet"/>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div class="col-9">
+    <div id="calendar"></div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var today = new Date();
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
+            },
+            locale: 'ru',
+            firstDay: 1,
+            initialDate: today,
+            navLinks: true, // can click day/week names to navigate views
+            selectable: true,
+            selectMirror: true,
+            select: function (arg) {
+                console.log('clicked')
+                var modal = document.getElementById('eventModal')
+                modal.style.display = 'block'
+                calendar.unselect()
+            },
+
+            eventClick: function (arg) {
+                if (confirm('Are you sure you want to delete this event?')) {
+                    arg.event.remove()
+                }
+            },
+            editable: true,
+            dayMaxEvents: true, // allow "more" link when too many events
+            events: {{ events|safe }},
+
+        });
+
+        calendar.render();
+    });
+    const closeBtn1 = document.getElementById('modalClose1');
+    const closeBtn2 = document.getElementById('modalClose2');
+    closeBtn1.addEventListener('click', () => {
+        const eventModal = document.getElementById('eventModal')
+        eventModal.style.display = 'none';
+    });
+    closeBtn2.addEventListener('click', () => {
+        const eventModal = document.getElementById('eventModal')
+        eventModal.style.display = 'none';
+    });
+</script>
+
+<script src="{% static 'vender/js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'vender/js/popper.js' %}"></script>
+<script src="{% static 'vender/js/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'vender/js/main.js' %}"></script>
+<!-- The javascript plugin to display page loading on top-->
+<script src="{% static 'vender/js/plugins/pace.min.js' %}"></script>
+<script src="{% static 'vender/js/calendar/main.js' %}"></script>
+</body>
+</html>
