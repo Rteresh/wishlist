@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # My Apps
     'users',
     'wish',
+    'calendars'
 ]
 
 MIDDLEWARE = [
