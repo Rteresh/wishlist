@@ -1,312 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-{% load static %}
-<head>
-    <title>TITLE</title>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <!-- Main CSS-->
-    <link rel="stylesheet" type="text/css" href="{% static 'vender/css/main.css' %}"/>
-    <!-- Font-icon css-->
-    <link rel="stylesheet" type="text/css"
-          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <link href="{% static 'vender/js/calendar/main.css' %}" rel="stylesheet"/>
-
-</head>
-<body class="app sidebar">
-<!-- Navbar-->
-{#Верхня часть#}
-<header class="app-header">
-    <!-- Sidebar toggle button-->
-    <a class="app-sidebar__toggle" href="#" data-toggle="sidebar" aria-label="Hide Sidebar"></a>
-    <!-- Navbar Right Menu-->
-    <ul class="app-nav">
-        <li class="app-search">
-            <input class="app-search__input" type="search" placeholder="Search"/>
-            <button class="app-search__button"><i class="fa fa-search"></i></button>
-        </li>
-        <!--Notification Menu-->
-        <li class="dropdown">
-            <a class="app-nav__item" href="#" data-toggle="dropdown" aria-label="Show notifications"><i
-                    class="fa fa-bell-o fa-lg"></i></a>
-            <ul class="app-notification dropdown-menu dropdown-menu-right">
-                <li class="app-notification__title">You have 4 new notifications.</li>
-                <div class="app-notification__content">
-                    <li>
-                        <a class="app-notification__item" href="javascript:;">
-                                    <span class="app-notification__icon">
-                                        <span class="fa-stack fa-lg"><i
-                                                class="fa fa-circle fa-stack-2x text-primary"></i><i
-                                                class="fa fa-envelope fa-stack-1x fa-inverse"></i></span>
-                                    </span>
-                            <div>
-                                <p class="app-notification__message">Lisa sent you a mail</p>
-                                <p class="app-notification__meta">2 min ago</p>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="app-notification__item" href="javascript:;">
-                                    <span class="app-notification__icon">
-                                        <span class="fa-stack fa-lg"><i
-                                                class="fa fa-circle fa-stack-2x text-danger"></i><i
-                                                class="fa fa-hdd-o fa-stack-1x fa-inverse"></i></span>
-                                    </span>
-                            <div>
-                                <p class="app-notification__message">Mail server not working</p>
-                                <p class="app-notification__meta">5 min ago</p>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="app-notification__item" href="javascript:;">
-                                    <span class="app-notification__icon">
-                                        <span class="fa-stack fa-lg"><i
-                                                class="fa fa-circle fa-stack-2x text-success"></i><i
-                                                class="fa fa-money fa-stack-1x fa-inverse"></i></span>
-                                    </span>
-                            <div>
-                                <p class="app-notification__message">Transaction complete</p>
-                                <p class="app-notification__meta">2 days ago</p>
-                            </div>
-                        </a>
-                    </li>
-                    <div class="app-notification__content">
-                        <li>
-                            <a class="app-notification__item" href="javascript:;">
-                                        <span class="app-notification__icon">
-                                            <span class="fa-stack fa-lg"><i
-                                                    class="fa fa-circle fa-stack-2x text-primary"></i><i
-                                                    class="fa fa-envelope fa-stack-1x fa-inverse"></i></span>
-                                        </span>
-                                <div>
-                                    <p class="app-notification__message">Lisa sent you a mail</p>
-                                    <p class="app-notification__meta">2 min ago</p>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="app-notification__item" href="javascript:;">
-                                        <span class="app-notification__icon">
-                                            <span class="fa-stack fa-lg"><i
-                                                    class="fa fa-circle fa-stack-2x text-danger"></i><i
-                                                    class="fa fa-hdd-o fa-stack-1x fa-inverse"></i></span>
-                                        </span>
-                                <div>
-                                    <p class="app-notification__message">Mail server not working</p>
-                                    <p class="app-notification__meta">5 min ago</p>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="app-notification__item" href="javascript:;">
-                                        <span class="app-notification__icon">
-                                            <span class="fa-stack fa-lg"><i
-                                                    class="fa fa-circle fa-stack-2x text-success"></i><i
-                                                    class="fa fa-money fa-stack-1x fa-inverse"></i></span>
-                                        </span>
-                                <div>
-                                    <p class="app-notification__message">Transaction complete</p>
-                                    <p class="app-notification__meta">2 days ago</p>
-                                </div>
-                            </a>
-                        </li>
-                    </div>
-                </div>
-                <li class="app-notification__footer"><a href="#">See all notifications.</a></li>
-            </ul>
-        </li>
-        <!-- User Menu-->
-        <li class="dropdown">
-            <a class="app-nav__item" href="#" data-toggle="dropdown" aria-label="Open Profile Menu"><i
-                    class="fa fa-user fa-lg"></i></a>
-            <ul class="dropdown-menu settings-menu dropdown-menu-right">
-                <li>
-                    <a class="dropdown-item" href="#"><i class="fa fa-cog fa-lg"></i> Settings</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#"><i class="fa fa-user fa-lg"></i> Profile</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#"><i class="fa fa-sign-out fa-lg"></i>
-                        Sign Out</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
-</header>
-<!-- Sidebar menu-->
-<div class="app-sidebar__overlay" data-toggle="sidebar"></div>
-{#Боковая часть#}
-<aside class="app-sidebar">
-    <div class="app-sidebar__user">
-        <img class="app-sidebar__user-avatar" src="https://sajib1066.github.io/images/me.jpg" alt="User Image"
-             height="50px" width="50px"/>
-        <div>
-            <p class="app-sidebar__user-name">Sajib Hossain</p>
-            <p class="app-sidebar__user-designation">Software Engineer</p>
-        </div>
-    </div>
-    <ul class="app-menu">
-        <li>
-            <a class="app-menu__item active" href="#"><i class="app-menu__icon fa fa-dashboard"></i><span
-                    class="app-menu__label">Dashboard</span></a>
-        </li>
-        <li>
-            <a class="app-menu__item" href="#"><i
-                    class="app-menu__icon fa fa-calendar"></i><span class="app-menu__label">Calendar</span></a>
-        </li>
-        <li class="treeview">
-            <a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-th-list"></i><span
-                    class="app-menu__label">Events</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-            <ul class="treeview-menu">
-                <li>
-                    <a class="treeview-item" href="#"><i
-                            class="icon fa fa-circle-o"></i> Running</a>
-                </li>
-                <li>
-                    <a class="treeview-item" href="#"><i
-                            class="icon fa fa-circle-o"></i> Upcoming</a>
-                </li>
-                <li>
-                    <a class="treeview-item" href="#"><i
-                            class="icon fa fa-circle-o"></i> All</a>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <a class="app-menu__item" href="#"><i class="app-menu__icon fa fa-file-code-o"></i><span
-                    class="app-menu__label">Docs</span></a>
-        </li>
-    </ul>
-</aside>
-{#Центральная часть календаря#}
-<main class="app-content">
-    <div class="row">
-        <div class="col">
-            <div class="tile row">
-                <div class="col">
-                    <div id="external-events">
-                        <h4 class="mb-4">Running Events</h4>
-                        {% for event in events_month %}
-                            <div class="fc-event">
-                                <h3>{{ event.title }}</h3>
-                                <p>From: {{ event.start_time }}</p>
-                                <p>To: {{ event.end_time }}</p>
-                            </div>
-                        {% empty %}
-                            <p>No Running Events Found</p>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="col-md-9  w-100">
-                    <div id="calendar">
-                    </div>
-                </div>
-                {#Создание формы для events#}
-                {#Создание формы для events#}
-
-                <div class="modal fade show" id="eventModal" tabindex="-1" role="dialog"
-                     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header bg-primary">
-                                <h5 class="modal-title text-white" id="exampleModalLongTitle">Add New Event</h5>
-                                <button id="modalClose1" type="button" class="close" data-dismiss="modal"
-                                        aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <form method="post">
-                                {% csrf_token %}
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <label for="recipient-name" class="col-form-label">Event Title:</label>
-                                        {{ form.title }}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="message-text" class="col-form-label">Description:</label>
-                                        {{ form.description }}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="message-text" class="col-form-label">Start Date:</label>
-                                        {{ form.start_time }}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="message-text" class="col-form-label">End Date:</label>
-                                        {{ form.end_time }}
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button id="modalClose2" type="button" class="btn btn-danger">Close</button>
-                                    <button type="submit" class="btn btn-primary">Save</button>
-                                </div>
-                            </form>
+{% extends 'calendars/base.html' %}
+{% block content %}
+    {#Центральная часть календаря#}
+    <div class="col">
+        <div class="tile row">
+            <div class="col">
+                <div id="external-events">
+                    <h4 class="mb-4">Running Events</h4>
+                    {% for event in events_month %}
+                        <div class="fc-event">
+                            <h3>{{ event.title }}</h3>
+                            <p>From: {{ event.start_time }}</p>
+                            <p>To: {{ event.end_time }}</p>
                         </div>
+                    {% empty %}
+                        <p>No Running Events Found</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-9  w-100">
+                <div id="calendar">
+                </div>
+            </div>
+            {#Создание формы для events#}
+            {#Создание формы для events#}
+
+            <div class="modal fade show" id="eventModal" tabindex="-1" role="dialog"
+                 aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary">
+                            <h5 class="modal-title text-white" id="exampleModalLongTitle">Add New Event</h5>
+                            <button id="modalClose1" type="button" class="close" data-dismiss="modal"
+                                    aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="recipient-name" class="col-form-label">Event Title:</label>
+                                    {{ form.title }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Description:</label>
+                                    {{ form.description }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">Start Date:</label>
+                                    {{ form.start_time }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="message-text" class="col-form-label">End Date:</label>
+                                    {{ form.end_time }}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button id="modalClose2" type="button" class="btn btn-danger">Close</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</main>
+{% endblock %}
 
-<!-- Essential javascripts for application to work-->
-<script src="{% static 'vender/js/jquery-3.3.1.min.js' %}"></script>
-<script src="{% static 'vender/js/popper.js' %}"></script>
-<script src="{% static 'vender/js/js/bootstrap.min.js' %}"></script>
-<script src="{% static 'vender/js/main.js' %}"></script>
-<!-- The javascript plugin to display page loading on top-->
-<script src="{% static 'vender/js/plugins/pace.min.js' %}"></script>
-<script src="{% static 'vender/js/calendar/main.js' %}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
-        var today = new Date();
-
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
-            },
-            locale: 'ru',
-            firstDay: 1,
-            initialDate: today,
-            navLinks: true, // can click day/week names to navigate views
-            selectable: true,
-            selectMirror: true,
-            select: function (arg) {
-                console.log('clicked')
-                var modal = document.getElementById('eventModal')
-                modal.style.display = 'block'
-                calendar.unselect()
-            },
-
-            eventClick: function (arg) {
-                if (confirm('Are you sure you want to delete this event?')) {
-                    arg.event.remove()
-                }
-            },
-            editable: true,
-            dayMaxEvents: true, // allow "more" link when too many events
-            events: {{ events|safe }},
-
-        });
-
-        calendar.render();
-    });
-    const closeBtn1 = document.getElementById('modalClose1');
-    const closeBtn2 = document.getElementById('modalClose2');
-    closeBtn1.addEventListener('click', () => {
-        const eventModal = document.getElementById('eventModal')
-        eventModal.style.display = 'none';
-    });
-    closeBtn2.addEventListener('click', () => {
-        const eventModal = document.getElementById('eventModal')
-        eventModal.style.display = 'none';
-    });
-</script>
-</body>
-</html>
